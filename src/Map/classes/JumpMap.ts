@@ -2,12 +2,15 @@ import L from "leaflet";
 import JumpRun, { JumpRunOpts } from "./JumpRun";
 import { fromPairs } from "lodash-es";
 import DistanceTicks, { DistanceTicksOpts } from "./DistanceTicks";
+import Winds from "./Winds";
 
 export interface JumpMapOpts {
   container: HTMLElement;
   center: L.LatLngExpression
   jumpRuns?: Record<string, JumpRunOpts>;
   distanceTicks?: DistanceTicksOpts;
+  onClick?: L.LeafletMouseEventHandlerFn;
+  winds?: Winds;
 }
 
 class JumpMap {
@@ -18,11 +21,15 @@ class JumpMap {
   jumpRuns: Record<string, JumpRun>;
   mounted: boolean;
   distanceTicks: DistanceTicks;
+  onClick?: L.LeafletMouseEventHandlerFn;
+  winds?: Winds;
 
-  constructor({ container, center, jumpRuns, distanceTicks }: JumpMapOpts) {
+  constructor({ container, center, jumpRuns, distanceTicks, onClick, winds }: JumpMapOpts) {
     this.container = container
     this.mounted = false
     this.center = L.latLng(center)
+    this.onClick = onClick
+    this.winds = winds
 
     this.map = L.map(container, {
       center: this.center,
@@ -45,7 +52,10 @@ class JumpMap {
 
   mount() {
     this.tileLayer.addTo(this.map)
-    this.map.on("click", console.log);
+    this.map.on("click", evt => {
+      console.log(evt)
+      if (this.onClick) this.onClick(evt)
+    });
     this.distanceTicks.mount();
     Object.values(this.jumpRuns).forEach(run => !run.mounted && run.mount())
     this.mounted = true

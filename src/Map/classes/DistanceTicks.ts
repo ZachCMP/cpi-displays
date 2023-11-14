@@ -1,6 +1,6 @@
 import L from "leaflet";
 import JumpMap from "./JumpMap";
-import { getPointFromCenter } from "../utils";
+import { getAnglesWithInterval, getPointFromCenter } from "../utils";
 
 export interface CompassOptions {
   interval?: number;
@@ -65,7 +65,7 @@ class DistanceTicks {
         });
         L.marker(labelPos, {
           icon: L.divIcon({
-            html: `<div style="color: white; background-color: rgba(0,0,0,0.5); font-size: 8pt; width: 25px; height: 15px; display: flex; justify-content: center; align-items: center; border-radius: 4px;">${distance.toFixed(
+            html: `<div style="color: white; background-color: rgba(0,0,0,0.0); font-size: 8pt; width: 25px; height: 15px; display: flex; justify-content: center; align-items: center; border-radius: 4px;">${distance.toFixed(
               2
             )}</div>`,
             iconAnchor: [12.5, 17],
@@ -77,25 +77,22 @@ class DistanceTicks {
 
     if (this.compass) {
       const { interval, numberInterval, distanceFromCenter, color } = this.compassOptions
-      new Array(Math.floor(360 / interval))
-        .fill(undefined)
-        .map((_, i, arr) => i * interval)
-        .forEach((angle) => {
-          const isNumbered = angle % numberInterval === 0
-          const start = getPointFromCenter(this.center, angle, distanceFromCenter)
-          const end = getPointFromCenter(this.center, angle, distanceFromCenter + (isNumbered ? 0.028 : 0.02))
-          L.polyline([start, end], { color, weight: 1 }).addTo(this.compassGroup)
+      getAnglesWithInterval(interval).forEach((angle) => {
+        const isNumbered = angle % numberInterval === 0
+        const start = getPointFromCenter(this.center, angle, distanceFromCenter)
+        const end = getPointFromCenter(this.center, angle, distanceFromCenter + (isNumbered ? 0.028 : 0.02))
+        L.polyline([start, end], { color, weight: 1 }).addTo(this.compassGroup)
 
-          if (isNumbered) {
-            L.marker(getPointFromCenter(this.center, angle, distanceFromCenter + 0.045), {
-              icon: L.divIcon({
-                html: `<div style="color: black; background-color: ${color}; font-size: 8pt; width: 25px; height: 25px; display: flex; justify-content: center; align-items: center; border-radius: 400px;">${angle}</div>`,
-                iconAnchor: [12.5, 12.5],
-                iconSize: [25, 25],
-              })}).addTo(this.compassGroup)
-          }
+        if (isNumbered) {
+          L.marker(getPointFromCenter(this.center, angle, distanceFromCenter + 0.045), {
+            icon: L.divIcon({
+              html: `<div style="color: ${color}; background-color: transparent; font-size: 8pt; width: 25px; height: 25px; display: flex; justify-content: center; align-items: center; border-radius: 400px;">${angle}</div>`,
+              iconAnchor: [12.5, 12.5],
+              iconSize: [25, 25],
+            })}).addTo(this.compassGroup)
+        }
 
-        })
+      })
     }
   }
 
