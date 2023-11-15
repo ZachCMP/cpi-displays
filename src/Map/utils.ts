@@ -24,6 +24,14 @@ export function knotsToMph(knots: number) {
   return knots * 1.15078
 }
 
+export function celsiusToFarenheit(celsius: number) {
+  return celsius * (9 / 5) + 32
+}
+
+export function freefallTimeForDistance(distance: number) {
+  return distance / (120 * 5280 / 60 / 60)
+}
+
 export function getPointFromCenter(center: L.LatLngExpression, angle: number, distance: number) {
   const bounds = L.latLng(center).toBounds(feetToMeters(Math.abs(distance) * 5280) * 2)
   const c = L.latLng(center)
