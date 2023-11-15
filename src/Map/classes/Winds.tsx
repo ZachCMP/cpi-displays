@@ -1,5 +1,4 @@
 import L from "leaflet";
-import JumpMap from "./JumpMap";
 import WINDS from '../winds.json'
 import { getComponentsFromVector, getPointFromCenter, knotsToMph } from "../utils";
 
@@ -14,22 +13,18 @@ export interface WindsOpts {
 }
 
 class Winds {
-  map: L.Map;
-  jumpMap: JumpMap;
   options: WindsOpts;
   input: WindsOpts['input'];
   winds: Record<keyof typeof WINDS.speed, WindsEntry>
   mounted: boolean;
 
-  constructor(jumpMap: JumpMap, options: WindsOpts) {
+  constructor(options: WindsOpts) {
     const {
       input
     } = options
 
     this.mounted = false
     this.options = options
-    this.map = jumpMap.map
-    this.jumpMap = jumpMap
     this.input = input
 
     this.winds = WINDS.altFt.reduce((acc, e) => {

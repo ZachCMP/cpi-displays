@@ -9,6 +9,8 @@ import { celsiusToFarenheit, knotsToMph } from "./utils";
 const PEAS_CENTER = { lat: 41.92217333707784, lng: -72.45824575424196 };
 const RUNWAY_CENTER = { lat: 41.925478140250775, lng: -72.45704412460329 };
 
+const winds = new Winds({ input: WINDS })
+
 export const MapComponent: React.FC<{ center?: L.LatLngExpression }> = ({
   center = PEAS_CENTER,
 }) => {
@@ -27,6 +29,7 @@ export const MapComponent: React.FC<{ center?: L.LatLngExpression }> = ({
         center,
         container,
         distanceTicks: { interval: 0.1, compassOptions: { color: "yellow" } },
+        winds,
       });
 
     const currentMap = map.current
@@ -34,8 +37,6 @@ export const MapComponent: React.FC<{ center?: L.LatLngExpression }> = ({
     if (!currentMap) return;
 
     const jrCenter = origin === "RUNWAY" ? RUNWAY_CENTER : PEAS_CENTER;
-
-    currentMap.winds = new Winds(currentMap, { input: WINDS })
 
     currentMap.mount();
     currentMap.addJumpRun("main", {
@@ -139,7 +140,7 @@ export const MapComponent: React.FC<{ center?: L.LatLngExpression }> = ({
         </div>
       </div>
 
-      {map.current?.winds && (
+      {winds && (
         <div
           style={{
             backgroundColor: 'rgba(0,0,0, 0.75)',
@@ -156,7 +157,7 @@ export const MapComponent: React.FC<{ center?: L.LatLngExpression }> = ({
         >
           <table>
             <tbody>
-            {Object.entries(map.current?.winds?.getWindsForRange(14000, 0)).reverse().map(([key, val]) => (
+            {Object.entries(winds.getWindsForRange(14000, 0)).reverse().map(([key, val]) => (
               <tr key={key}>
                 <td>{key === '0' ? 'Gnd' : key}</td>
                 <td>{val.direction}°</td>
