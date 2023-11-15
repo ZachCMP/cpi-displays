@@ -6,9 +6,12 @@ import Canopy from "./classes/Canopy";
 import Winds from "./classes/Winds";
 import { WindsComponent } from "./Winds/Winds";
 import { useWindsAloft } from "./Winds/useWindsAloft";
+import { JumpRunOffset } from "./classes/JumpRun";
 
 const PEAS_CENTER = { lat: 41.92217333707784, lng: -72.45824575424196 };
 const RUNWAY_CENTER = { lat: 41.925478140250775, lng: -72.45704412460329 };
+// const PEAS_OFFSET = { angle: 0, distance: 0 }
+// const RUNWAY_OFFSET = { angle: 16, distance: 0.23 }
 
 const baseWinds = new Winds({ input: Winds.lookupFromInput(WINDS) })
 
@@ -20,6 +23,7 @@ export const MapComponent: React.FC<{ center?: L.LatLngExpression }> = ({
   const [spot, setSpot] = useState<number>(0);
   const [angle, setAngle] = useState<number>(0);
   const [groups, setGroups] = useState<number>(5);
+  const [offset, setOffset] = useState<JumpRunOffset>({ angle: 0, distance: 0 })
   const [origin, setOrigin] = useState<"PEAS" | "RUNWAY">("PEAS");
   const [showCanopy, setShowCanopy] = useState(false)
   const [canopy, setCanopy] = useState<Canopy | undefined>()
@@ -47,7 +51,7 @@ export const MapComponent: React.FC<{ center?: L.LatLngExpression }> = ({
     currentMap.addJumpRun("main", {
       spot,
       angle,
-      offset: { angle: 0, distance: 0 },
+      offset,
       center: jrCenter,
       groups,
     });
@@ -62,7 +66,7 @@ export const MapComponent: React.FC<{ center?: L.LatLngExpression }> = ({
         })
       }
     }
-  }, [center, spot, angle, origin, showCanopy, groups, winds]);
+  }, [center, spot, angle, origin, showCanopy, groups, winds, offset]);
 
   useEffect(() => {
     if (showCanopy && !canopy?.mounted) canopy?.mount()
@@ -86,7 +90,7 @@ export const MapComponent: React.FC<{ center?: L.LatLngExpression }> = ({
         }}
       >
         <div>
-          <label>Jump Run</label>
+          <label>Heading</label>
           <input
             value={angle}
             onChange={(e) => {
@@ -103,6 +107,28 @@ export const MapComponent: React.FC<{ center?: L.LatLngExpression }> = ({
           <input
             value={spot}
             onChange={(e) => setSpot(parseFloat(e.target.value) || 0)}
+            type="number"
+            step={0.1}
+          />
+        </div>
+        <div>
+          <label>Offset Angle</label>
+          <input
+            value={offset.angle}
+            onChange={(e) => {
+              const value = parseFloat(e.target.value)
+              const angle = value ? (value < 0 ? 360 + value : value) : 0
+              setOffset(prev => ({ ...prev, angle }))
+            }}
+            type="number"
+            step={1}
+          />
+        </div>
+        <div>
+          <label>Offset Distance</label>
+          <input
+            value={offset.distance}
+            onChange={(e) => setOffset(prev => ({ ...prev, distance: parseFloat(e.target.value) || 0 }))}
             type="number"
             step={0.1}
           />

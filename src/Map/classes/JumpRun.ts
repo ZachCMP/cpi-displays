@@ -37,6 +37,7 @@ class JumpRun {
   redLightElement: L.Polyline;
   greenLightElement: L.Polyline;
   groupsElement: L.LayerGroup;
+  centerElement: L.CircleMarker;
   mounted: boolean;
   winds?: Winds;
   airspeed: number;
@@ -88,6 +89,7 @@ class JumpRun {
       weight: 5,
     });
     this.groupsElement = L.layerGroup();
+    this.centerElement = L.circleMarker(this.offsetCenter, { radius: 6 })
     this.setupGroups()
   }
 
@@ -148,6 +150,7 @@ class JumpRun {
       color: this.greenLightColor,
       weight: 10,
     });
+    this.centerElement = L.circleMarker(this.offsetCenter, { radius: 6 })
     this.setupGroups()
   }
 
@@ -187,6 +190,7 @@ class JumpRun {
   }
 
   mount() {
+    this.centerElement.addTo(this.map)
     this.redLightElement.addTo(this.map).bringToFront();
     this.greenLightElement.addTo(this.map).bringToFront();
     this.groupsElement.addTo(this.map);
@@ -195,8 +199,10 @@ class JumpRun {
 
   unmount() {
     if (!this.mounted) return;
+    this.centerElement.removeFrom(this.map)
     this.redLightElement.removeFrom(this.map);
     this.greenLightElement.removeFrom(this.map);
+    this.groupsElement.removeFrom(this.map);
     this.mounted = false;
   }
 
