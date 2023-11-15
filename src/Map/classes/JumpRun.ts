@@ -115,6 +115,7 @@ class JumpRun {
       angle,
       redLightColor = "red",
       greenLightColor = "lime",
+      winds,
     } = options;
 
     this.options = options;
@@ -130,6 +131,7 @@ class JumpRun {
     this.redPrior = redPrior;
     this.redLightColor = redLightColor;
     this.greenLightColor = greenLightColor;
+    this.winds = winds || jumpMap.winds;
 
     const redLightStart = getPointFromCenter(
       this.offsetCenter,

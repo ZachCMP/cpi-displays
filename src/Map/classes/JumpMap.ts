@@ -83,6 +83,11 @@ class JumpMap {
     run.update(opts)
     return run
   }
+
+  updateWinds(winds: Winds) {
+    this.winds = winds
+    Object.values(this.jumpRuns).forEach(jr => jr.update({ winds, spot: jr.spot, angle: jr.angle }))
+  }
 }
 
 export default JumpMap

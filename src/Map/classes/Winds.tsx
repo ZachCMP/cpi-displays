@@ -1,6 +1,8 @@
 import L from "leaflet";
 import WINDS from '../winds.json'
-import { getComponentsFromVector, getPointFromCenter, knotsToMph } from "../utils";
+import { celsiusToFarenheit, getComponentsFromVector, getPointFromCenter, knotsToMph } from "../utils";
+
+export type WindData = typeof WINDS
 
 export interface WindsEntry {
   speed: number;
@@ -8,37 +10,26 @@ export interface WindsEntry {
   temp: number;
 }
 
+export type WindsLookup = Record<keyof typeof WINDS.speed, WindsEntry>
+
 export interface WindsOpts {
-  input: typeof WINDS;
+  input?: WindsLookup
 }
 
 class Winds {
   options: WindsOpts;
-  input: WindsOpts['input'];
-  winds: Record<keyof typeof WINDS.speed, WindsEntry>
+  winds: WindsLookup
   mounted: boolean;
 
   constructor(options: WindsOpts) {
     const {
-      input
+      input,
     } = options
 
     this.mounted = false
     this.options = options
-    this.input = input
 
-    this.winds = WINDS.altFt.reduce((acc, e) => {
-      const alt = String(e) as keyof typeof WINDS.speed;
-
-      return {
-        ...acc,
-        [alt]: {
-          speed: WINDS.speed[alt],
-          direction: WINDS.direction[alt],
-          temp: WINDS.temp[alt],
-        },
-      };
-    }, {} as Record<keyof typeof WINDS.speed, WindsEntry>);
+    this.winds = input || Winds.lookupFromInput(WINDS);
   }
 
   getWindsForRange(upper: number, lower: number) {
@@ -86,6 +77,25 @@ class Winds {
     const { x: sx, y: sy} = getComponentsFromVector(heading, airspeed)
 
     return Math.sqrt(Math.pow(sx - wx, 2) + Math.pow(sy - wy, 2))
+  }
+
+  static lookupFromInput(input: typeof WINDS) {
+    return input.altFt.reduce((acc, e) => {
+      const alt = String(e) as keyof typeof WINDS.speed;
+
+      return {
+        ...acc,
+        [alt]: {
+          speed: Math.round(knotsToMph(WINDS.speed[alt])),
+          direction: WINDS.direction[alt],
+          temp: Math.round(celsiusToFarenheit(WINDS.temp[alt])),
+        },
+      };
+    }, {} as WindsLookup);
+  }
+
+  static forInput(input: typeof WINDS) {
+    return new Winds({ input: Winds.lookupFromInput(input) })
   }
 }
 
